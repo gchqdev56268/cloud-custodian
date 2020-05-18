@@ -71,6 +71,7 @@ class AutoTagRole(EventAction):
                       ]}},
            'update': {'type': 'boolean'},
            'tag': {'type': 'string'},
+           'propagate': {'type': 'boolean'},
            'principal_id_tag': {'type': 'string'}
            }
     )
@@ -132,7 +133,12 @@ class AutoTagRole(EventAction):
         }
 
         for key, value in new_tags.items():
-            tag_action({'key': key, 'value': value}, self.manager).process(untagged_resources)
+            if self.data.get("propagate", False):
+                tag_action({'key': key, 'value': value, 'propagate': True},
+                        self.manager).process(untagged_resources)
+            else:
+                tag_action({'key': key, 'value': value},
+                        self.manager).process(untagged_resources)
         return new_tags
 
     @classmethod
